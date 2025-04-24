@@ -2,78 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Google Play Store Visualization</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="container">
-      <h1 class="logo">GPlayViz</h1>
+  <header class="navbar-floating">
+    <div class="navbar-inner">
+      <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo" width="32" style="vertical-align: middle; margin-right: 8px;">
+        <span>Startup</span>
+      </div>
       <nav>
         <ul>
-          <li><a href="#hero">Home</a></li>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">DataDeck</a></li>
           <li><a href="#about">About</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#viz">Visualization</a></li>
-          <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
+      <a href="#chartSection" class="call-btn">DataDeck</a>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section id="hero" class="hero">
-    <div class="container">
-      <h2>📊 Explore Google Play Store Apps Data</h2>
-      <p>Interaktif. Informatif. Visualisasi real-time dengan D3.js</p>
-      <a href="#viz" class="btn">Get Started</a>
-    </div>
-  </section>
+  <main class="container">
+    <section class="hero">
+      <p style="font-size: 18px;"><span style="font-size: 24px;">✋</span> Hey! It's me Reky,</p>
+      <h2>
+        Crafting <span class="highlight">purpose driven experiences</span> that inspire & engage.
+      </h2>
+      <p>Explore trends and insights from app data like never before.</p>
+      <a href="#chartSection" class="btn">Get Started</a>
+    </section>
 
-  <!-- About Section -->
-  <section id="about" class="about">
-    <div class="container">
-      <h2>About This Project</h2>
-      <p>Website ini menyajikan data dari Google Play Store yang divisualisasikan menggunakan D3.js. Tujuannya adalah untuk memahami distribusi aplikasi berdasarkan kategori, rating, dan jumlah unduhan secara interaktif.</p>
-    </div>
-  </section>
+    <section id="features" class="features-section">
+      <div class="container">
+        <h2 class="section-title">✧ Key Features</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>🔥 Populer di Kategori Game</h3>
+            <p>Game adalah kategori aplikasi paling populer berdasarkan jumlah aplikasi yang tersedia.</p>
+          </div>
+          <div class="feature-card">
+            <h3>⭐ Rating Dominan 4.0+</h3>
+            <p>Mayoritas aplikasi memiliki rating antara 4.0 hingga 4.5, menunjukkan kualitas yang cukup baik secara umum.</p>
+          </div>
+          <div class="feature-card">
+            <h3>💸 Gratis ≠ Lebih Rendah</h3>
+            <p>Aplikasi berbayar sedikit lebih unggul dalam rating, namun perbedaannya tidak signifikan dibandingkan aplikasi gratis.</p>
+          </div>
+          <div class="feature-card">
+            <h3>📝 Review vs Rating</h3>
+            <p>Jumlah ulasan berbanding lurus dengan rating tinggi — menunjukkan kepercayaan pengguna terhadap kualitas aplikasi.</p>
+          </div>
+          <div class="feature-card">
+            <h3>📥 Tools & Sosial Paling Banyak Diunduh</h3>
+            <p>Kategori Tools dan Social memiliki rata-rata unduhan yang sangat tinggi dibanding kategori lain.</p>
+          </div>
+          <div class="feature-card">
+            <h3>📦 Ukuran ≠ Rating</h3>
+            <p>Ukuran aplikasi tidak memiliki korelasi kuat terhadap rating yang diterima pengguna.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
 
-  <!-- Features Section -->
-  <section id="features" class="features">
-    <div class="container">
-      <h2>Features</h2>
-      <ul>
-        <li>Filter kategori aplikasi</li>
-        <li>Grafik interaktif dengan D3.js</li>
-        <li>Tampilan dinamis dan responsif</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Visualization Section -->
-  <section id="viz" class="viz">
-    <div class="container">
-      <h2>Visualisasi Jumlah Aplikasi per Kategori</h2>
-      <label for="categoryFilter">Filter Kategori:</label>
+    <section class="about" id="about">
+      <div class="marquee">
+        <div class="track">
+          <div class="content">
+            ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ 
+          </div>
+          <div class="content">
+            ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ 
+          </div>
+        </div>
+      </div>
+      
+    
+      <div class="about-inner">
+        <p class="tag">✧ ABOUT ME</p>
+        <h2>I’m Reky, the creator of DataDeck.</h2>
+        <p>
+          With a passion for clean data visualization and impactful design, I built this platform to simplify how users explore app trends. This project combines modern frontend techniques with meaningful data storytelling.
+        </p>
+    
+        <p class="desc">
+          <strong>About the app:</strong> DataDeck is a visualization dashboard built from real Google Play Store data. It helps users analyze app categories, trends, and performance in an interactive and elegant way — all in your browser.
+        </p>
+      </div>
+    </section>
+    
+    <section id="chartSection" class="viz">
+      <h2>Category Distribution</h2>
+      <label for="categoryFilter">Filter Category:</label>
       <select id="categoryFilter">
-        <option value="All">Semua Kategori</option>
+        <option value="All">All</option>
       </select>
-      <svg width="1000" height="500"></svg>
-      <div class="tooltip"></div>
-    </div>
-  </section>
+      <canvas id="categoryChart" width="400" height="200"></canvas>
+    </section>
+  </main>
 
-  <!-- Contact Section -->
-  <section id="contact" class="contact">
+  <footer class="contact">
     <div class="container">
-      <h2>Contact</h2>
-      <p>Untuk pertanyaan dan kolaborasi, silakan hubungi kami via email: <a href="mailto:team@gplayviz.com">team@gplayviz.com</a></p>
+      <p>© 2025 DataDeck. Made by Reky 🚀</p>
     </div>
-  </section>
+  </footer>
 
-  <script src="js/chart-by-category.js"></script>
+  <script src="chart-category.js"></script>
 </body>
 </html>
