@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Google Play Store Visualization</title>
+  <title>DataDeck</title>
   <link rel="stylesheet" href="/css/style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,8 +12,8 @@
   <header class="navbar-floating">
     <div class="navbar-inner">
       <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo" width="32" style="vertical-align: middle; margin-right: 8px;">
-        <span>Startup</span>
+        <img src="/img/datadeck logo.png" alt="Logo" width="28" style="vertical-align: middle; margin-right: 8px;">
+        <span>VisualisasiData</span>
       </div>
       <nav>
         <ul>
@@ -27,7 +27,7 @@
   </header>
 
   <main class="container">
-    <section class="hero">
+    <section id="hero" class="hero">
       <p style="font-size: 18px;"><span style="font-size: 24px;">✋</span> Hey! It's me Reky,</p>
       <h2>
         Crafting <span class="highlight">purpose driven experiences</span> that inspire & engage.
@@ -37,36 +37,41 @@
     </section>
 
     <section id="features" class="features-section">
-      <div class="container">
-        <h2 class="section-title">✧ Key Features</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <h3>🔥 Populer di Kategori Game</h3>
-            <p>Game adalah kategori aplikasi paling populer berdasarkan jumlah aplikasi yang tersedia.</p>
-          </div>
-          <div class="feature-card">
-            <h3>⭐ Rating Dominan 4.0+</h3>
-            <p>Mayoritas aplikasi memiliki rating antara 4.0 hingga 4.5, menunjukkan kualitas yang cukup baik secara umum.</p>
-          </div>
-          <div class="feature-card">
-            <h3>💸 Gratis ≠ Lebih Rendah</h3>
-            <p>Aplikasi berbayar sedikit lebih unggul dalam rating, namun perbedaannya tidak signifikan dibandingkan aplikasi gratis.</p>
-          </div>
-          <div class="feature-card">
-            <h3>📝 Review vs Rating</h3>
-            <p>Jumlah ulasan berbanding lurus dengan rating tinggi — menunjukkan kepercayaan pengguna terhadap kualitas aplikasi.</p>
-          </div>
-          <div class="feature-card">
-            <h3>📥 Tools & Sosial Paling Banyak Diunduh</h3>
-            <p>Kategori Tools dan Social memiliki rata-rata unduhan yang sangat tinggi dibanding kategori lain.</p>
-          </div>
-          <div class="feature-card">
-            <h3>📦 Ukuran ≠ Rating</h3>
-            <p>Ukuran aplikasi tidak memiliki korelasi kuat terhadap rating yang diterima pengguna.</p>
-          </div>
+      <h2 class="features-title">✧ Key Insights</h2>
+      <div class="features-container">
+        <div class="feature-card">
+          <h3>Most Popular Category</h3>
+          <p>Discover the top app categories with the highest number of apps.</p>
+          <a href="#visualization1" class="card-btn">Explore</a>
+        </div>
+        <div class="feature-card">
+          <h3>Rating Distribution</h3>
+          <p>Analyze how user ratings are distributed across all apps.</p>
+          <a href="#visualization2" class="card-btn">Explore</a>
+        </div>
+        <div class="feature-card">
+          <h3>Paid vs Free Ratings</h3>
+          <p>Compare average ratings between paid and free apps.</p>
+          <a href="#visualization3" class="card-btn">Explore</a>
+        </div>
+        <div class="feature-card">
+          <h3>Reviews & Ratings</h3>
+          <p>See how number of reviews correlates with ratings.</p>
+          <a href="#visualization4" class="card-btn">Explore</a>
+        </div>
+        <div class="feature-card">
+          <h3>Top Downloads by Category</h3>
+          <p>Explore which categories have the most app downloads.</p>
+          <a href="#visualization5" class="card-btn">Explore</a>
+        </div>
+        <div class="feature-card">
+          <h3>App Size vs Rating</h3>
+          <p>Understand the relationship between app size and ratings.</p>
+          <a href="#visualization6" class="card-btn">Explore</a>
         </div>
       </div>
     </section>
+    
     
 
     <section class="about" id="about">
@@ -80,7 +85,7 @@
           </div>
         </div>
       </div>
-      
+
     
       <div class="about-inner">
         <p class="tag">✧ ABOUT ME</p>
@@ -95,14 +100,46 @@
       </div>
     </section>
     
-    <section id="chartSection" class="viz">
-      <h2>Category Distribution</h2>
-      <label for="categoryFilter">Filter Category:</label>
-      <select id="categoryFilter">
-        <option value="All">All</option>
-      </select>
-      <canvas id="categoryChart" width="400" height="200"></canvas>
+    <section class="datadeck">
+      <div class="datadeck-container">
+        <!-- Fitur Buttons -->
+        <div class="datadeck-sidebar">
+          <h3 class="sidebar-title">🔧 Fitur Visualisasi</h3>
+          <button class="feature-btn" data-chart="bar">Bar Chart</button>
+          <button class="feature-btn" data-chart="line">Line Chart</button>
+          <button class="feature-btn" data-chart="pie">Pie Chart</button>
+          <button class="feature-btn" data-chart="doughnut">Doughnut Chart</button>
+          <button class="feature-btn" data-chart="area">Area Chart</button>
+          <button class="feature-btn" data-chart="radar">Radar Chart</button>
+        </div>
+    
+        <!-- Chart Display -->
+        <div class="datadeck-visual">
+          <h2 class="chart-title">📊 Visualisasi Data</h2>
+          <div id="chart-container">
+            <canvas id="mainChart" width="600" height="400"></canvas>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Tech Stack Running Text -->
+      <div class="techstack-marquee">
+        <div class="marquee">
+          <span>HTML</span>
+          <span>CSS</span>
+          <span>JavaScript</span>
+          <span>D3.js</span>
+          <span>Chart.js</span>
+          <span>Bootstrap</span>
+          <span>Node.js</span>
+          <span>Express</span>
+          <span>Git</span>
+          <span>Netlify</span>
+        </div>
+      </div>
     </section>
+    
+    
   </main>
 
   <footer class="contact">
@@ -111,6 +148,6 @@
     </div>
   </footer>
 
-  <script src="chart-category.js"></script>
+  <script src="chart.js"></script>
 </body>
 </html>
