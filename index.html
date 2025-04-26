@@ -100,54 +100,39 @@
       </div>
     </section>
     
-    <section class="datadeck">
-      <div class="datadeck-container">
-        <!-- Fitur Buttons -->
-        <div class="datadeck-sidebar">
-          <h3 class="sidebar-title">🔧 Fitur Visualisasi</h3>
-          <button class="feature-btn" data-chart="bar">Bar Chart</button>
-          <button class="feature-btn" data-chart="line">Line Chart</button>
-          <button class="feature-btn" data-chart="pie">Pie Chart</button>
-          <button class="feature-btn" data-chart="doughnut">Doughnut Chart</button>
-          <button class="feature-btn" data-chart="area">Area Chart</button>
-          <button class="feature-btn" data-chart="radar">Radar Chart</button>
-        </div>
-    
-        <!-- Chart Display -->
-        <div class="datadeck-visual">
-          <h2 class="chart-title">📊 Visualisasi Data</h2>
-          <div id="chart-container">
-            <canvas id="mainChart" width="600" height="400"></canvas>
-          </div>
-        </div>
+    <div class="container">
+      <h1>Visualisasi Data Penjualan Video Game Global</h1>
+
+      <div class="btn-container">
+          <button id="lineChartBtn" class="btn active">
+              Line Chart (Tahun vs Penjualan)
+          </button>
+          <button id="barChartBtn" class="btn">
+              Bar Chart (Platform vs Penjualan)
+          </button>
       </div>
-    
-      <!-- Tech Stack Running Text -->
-      <div class="techstack-marquee">
-        <div class="marquee">
-          <span>HTML</span>
-          <span>CSS</span>
-          <span>JavaScript</span>
-          <span>D3.js</span>
-          <span>Chart.js</span>
-          <span>Bootstrap</span>
-          <span>Node.js</span>
-          <span>Express</span>
-          <span>Git</span>
-          <span>Netlify</span>
-        </div>
+
+      <div
+          id="chart-container"
+          class="chart-container"
+      >
+          <div class="loading">Memuat data dari file CSV...</div>
       </div>
-    </section>
+
+      <div class="legend" id="chart-legend"></div>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
     
     
   </main>
 
   <footer class="contact">
     <div class="container">
-      <p>© 2025 DataDeck. Made by Reky 🚀</p>
+      <p>© 2025 DataDeck.</p>
     </div>
   </footer>
-
-  <script src="chart.js"></script>
+  <script src="js/d3.v7.min.js"></script>
+  <script src="js/chart.js"></script>
 </body>
 </html>
