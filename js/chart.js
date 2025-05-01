@@ -1,356 +1,328 @@
-// Variabel state untuk menyimpan data dan grafik aktif
-let data = [];
-let activeChart = "lineChart";
-let svg, tooltip;
+ // Variables to store state
+ let playStoreData = [];
+ let chartType = 'category';
+ let limit = 15;
+ let sortOrder = 'desc';
+ let chart, tooltip;
 
-// Inisialisasi setelah halaman dimuat
-document.addEventListener("DOMContentLoaded", function () {
-    // Setup event listener untuk tombol
-    document
-        .getElementById("lineChartBtn")
-        .addEventListener("click", function () {
-            setActiveChart("lineChart");
-            this.classList.add("active");
-            document.getElementById("barChartBtn").classList.remove("active");
-        });
+ // Initialize after page loaded
+ document.addEventListener('DOMContentLoaded', function() {
+     // Setup event listeners for controls
+     document.getElementById('categoryBtn').addEventListener('click', function() {
+         setActiveChart('category');
+         setActiveButton(this);
+     });
+     
+     document.getElementById('ratingBtn').addEventListener('click', function() {
+         setActiveChart('rating');
+         setActiveButton(this);
+     });
+     
+     document.getElementById('installsBtn').addEventListener('click', function() {
+         setActiveChart('installs');
+         setActiveButton(this);
+     });
+     
+     document.getElementById('limitSelect').addEventListener('change', function() {
+         limit = this.value === 'all' ? null : parseInt(this.value);
+         renderChart();
+     });
+     
+     document.getElementById('sortSelect').addEventListener('change', function() {
+         sortOrder = this.value;
+         renderChart();
+     });
+     
+     // Initialize tooltip
+     tooltip = d3.select("#tooltip");
+     
+     // Load data
+     loadData();
+ });
 
-    document
-        .getElementById("barChartBtn")
-        .addEventListener("click", function () {
-            setActiveChart("barChart");
-            this.classList.add("active");
-            document.getElementById("lineChartBtn").classList.remove("active");
-        });
+ function setActiveButton(button) {
+     // Remove active class from all buttons
+     document.querySelectorAll('.control-group .btn').forEach(btn => {
+         btn.classList.remove('active');
+     });
+     
+     // Add active class to the clicked button
+     button.classList.add('active');
+ }
 
-    // Inisialisasi tooltip
-    tooltip = d3.select("#tooltip");
+ // Function to load data from CSV
+ function loadData() {
+     // Use PapaParse to load the CSV file
+     Papa.parse('data/googleplaystore.csv', {
+         header: true,
+         download: true,
+         dynamicTyping: true,
+         skipEmptyLines: true,
+         complete: function(results) {
+             // Process data
+             playStoreData = results.data;
+             
+             // Clean and prepare data
+             playStoreData.forEach(d => {
+                 // Convert string values to numbers where appropriate
+                 if (typeof d.Rating === 'string') d.Rating = parseFloat(d.Rating);
+                 if (typeof d.Reviews === 'string') d.Reviews = parseInt(d.Reviews.replace(/,/g, ''));
+                 
+                 // Process installs (remove '+' and ',' and convert to number)
+                 if (typeof d.Installs === 'string') {
+                     d.Installs = parseInt(d.Installs.replace(/[+,]/g, '')) || 0;
+                 }
+             });
+             
+             // Hide loading and render chart
+             document.querySelector('.loading').style.display = 'none';
+             renderChart();
+         },
+         error: function(error) {
+             console.error('Error loading CSV:', error);
+             document.querySelector('.loading').style.display = 'none';
+             document.getElementById('chart').innerHTML = '<div class="error">Failed to load data. Please check if the CSV file is accessible.</div>';
+         }
+     });
+ }
 
-    // Muat data dari CSV
-    loadData();
-});
+ // Function to set active chart type and render
+ function setActiveChart(type) {
+     chartType = type;
+     renderChart();
+ }
 
-// Fungsi untuk memuat data dari CSV
-function loadData() {
-    d3.csv("data/googleplaystore.csv")
-        .then(function (csvData) {
-            // Konversi string menjadi angka untuk data numerik
-            csvData.forEach((d) => {
-                d.Rating = +d.Rating;
-                d.Reviews = +d.Reviews;
-                d.Size = +d.Size;
-                d.Installs = +d.Installs;
-                d.Price = +d.Price;
-                d.Current_Ver = +d.Current_Ver;
-            });
-
-            data = csvData;
-            processData();
-        })
-        .catch((error) => {
-            console.error("Error loading CSV:", error);
-            showError(
-                "Gagal memuat file CSV. Pastikan file vgsales_clean.csv tersedia di folder yang sama dengan file HTML ini."
-            );
-        });
-}
-
-// Fungsi untuk menampilkan pesan error
-function showError(message) {
-    document.querySelector(".loading").style.display = "none";
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "error-message";
-    errorDiv.innerHTML = `<strong>Error:</strong> ${message}`;
-    document.getElementById("chart-container").appendChild(errorDiv);
-}
-
-// Fungsi untuk memproses data
-function processData() {
-    // Hapus pesan loading
-    document.querySelector(".loading").style.display = "none";
-
-    // Render grafik default (Line Chart)
-    renderChart();
-}
-
-// Fungsi untuk mengatur grafik aktif dan merender ulang
-function setActiveChart(chartType) {
-    activeChart = chartType;
-    renderChart();
-}
-
-// Fungsi untuk merender grafik berdasarkan tipe yang aktif
-function renderChart() {
-    // Bersihkan container grafik
-    const container = document.getElementById("chart-container");
-    container.innerHTML = "";
-
-    // Buat elemen SVG baru
-    svg = d3
-        .select("#chart-container")
-        .append("svg")
-        .attr("width", "80%")
-        .attr("height", "80%")
-        .attr("display", "flex")
-        .attr("justify-content", "center")
-        .attr("viewBox", "0 0 900 500");
-
-    // Render berdasarkan tipe grafik yang aktif
-    if (activeChart === "lineChart") {
-        renderLineChart();
-    } else {
-        renderBarChart();
-    }
-}
-
-// Fungsi untuk render Line Chart (Tahun vs Total Penjualan Global)
-function renderLineChart() {
-    // Filter data dengan tahun yang valid
-    const validData = data.filter((d) => d.Year && !isNaN(d.Year));
-
-    // Persiapkan data untuk line chart (agregat penjualan per tahun)
-    const yearlyData = d3.rollup(
-        validData,
-        (v) => d3.sum(v, (d) => d.Global_Sales),
-        (d) => d.Year
-    );
-
-    const lineData = Array.from(yearlyData, ([year, sales]) => ({
-        year,
-        sales,
-    })).sort((a, b) => a.year - b.year); // UrutkFan berdasarkan tahun
-
-    // Setup margin dan dimensi
-    const margin = { top: 50, right: 50, bottom: 70, left: 80 };
-    const width = 900 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
-
-    // Append grup untuk grafik dengan margin
-    const g = svg
-        .append("g")
-        .attr("transform", `translate(${margin.left + 8},${margin.top})`);
-
-    // Setup skala X dan Y
-    const xScale = d3
-        .scaleLinear()
-        .domain(d3.extent(lineData, (d) => d.year))
-        .range([0, width]);
-
-    const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(lineData, (d) => d.sales) * 1.1]) // 10% margin atas
-        .range([height, 0]);
-
-    // Buat line generator
-    const line = d3
-        .line()
-        .x((d) => xScale(d.year))
-        .y((d) => yScale(d.sales))
-        .curve(d3.curveMonotoneX);
-
-    // Tambahkan sumbu X
-    g.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")))
-        .selectAll("text")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .attr("transform", "rotate(-45)");
-
-    // Tambahkan sumbu Y
-    g.append("g").call(d3.axisLeft(yScale));
-
-    // Tambahkan label sumbu X
-    g.append("text")
-        .attr("class", "axis-label")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 10)
-        .style("text-anchor", "middle")
-        .text("Tahun Rilis");
-
-    // Tambahkan label sumbu Y
-    g.append("text")
-        .attr("class", "axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left)
-        .style("text-anchor", "middle")
-        .text("Total Penjualan Global (Juta Unit)");
-
-    // Tambahkan judul
-    svg.append("text")
-        .attr("x", 450)
-        .attr("y", 30)
-        .attr("text-anchor", "middle")
-        .style("font-size", "18px")
-        .style("font-weight", "bold")
-        .text("Tren Penjualan Game Global Per Tahun");
-
-    // Tambahkan garis
-    g.append("path")
-        .datum(lineData)
-        .attr("fill", "none")
-        .attr("stroke", "#4CAF50")
-        .attr("stroke-width", 3)
-        .attr("d", line);
-
-    // Tambahkan titik data
-    g.selectAll(".dot")
-        .data(lineData)
-        .enter()
-        .append("circle")
-        .attr("class", "dot")
-        .attr("cx", (d) => xScale(d.year))
-        .attr("cy", (d) => yScale(d.sales))
-        .attr("r", 5)
-        .attr("fill", "#45a049")
-        .on("mouseover", function (event, d) {
-            d3.select(this).attr("r", 8).attr("fill", "#2E7D32");
-
-            tooltip
-                .style("opacity", 1)
-                .html(
-                    `<strong>Tahun:</strong> ${
-                        d.year
-                    }<br><strong>Penjualan:</strong> ${d.sales.toFixed(2)} Juta`
-                )
-                .style("left", event.pageX + 10 + "px")
-                .style("top", event.pageY - 30 + "px");
-        })
-        .on("mouseout", function () {
-            d3.select(this).attr("r", 5).attr("fill", "#45a049");
-
-            tooltip.style("opacity", 0);
-        });
-
-    // Update keterangan
-    document.getElementById(
-        "chart-legend"
-    ).innerHTML = `Data menunjukkan total penjualan game (dalam juta unit) untuk setiap tahun rilis. Total ${lineData.length} tahun ditampilkan.`;
-}
-
-// Fungsi untuk render Bar Chart (Platform vs Total Penjualan)
-function renderBarChart() {
-    // Persiapkan data untuk bar chart (agregat penjualan per platform)
-    const platformData = d3.rollup(
-        data,
-        (v) => d3.sum(v, (d) => d.Global_Sales),
-        (d) => d.Platform
-    );
-
-    const barData = Array.from(platformData, ([platform, sales]) => ({
-        platform,
-        sales,
-    })).sort((a, b) => b.sales - a.sales); // Urutkan dari terbesar ke terkecil
-
-    // Setup margin dan dimensi
-    const margin = { top: 50, right: 50, bottom: 70, left: 120 };
-    const width = 900 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
-
-    // Truncate data jika terlalu banyak (ambil top 15)
-    const displayData = barData.slice(0, 15);
-
-    // Append grup untuk grafik dengan margin
-    const g = svg
-        .append("g")
-        .attr("transform", `translate(${margin.left - 24},${margin.top - 12})`);
-
-    // Setup skala X dan Y
-    const xScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(displayData, (d) => d.sales) * 1.1]) // 10% margin kanan
-        .range([0, width]);
-
-    const yScale = d3
-        .scaleBand()
-        .domain(displayData.map((d) => d.platform))
-        .range([0, height])
-        .padding(0.2);
-
-    // Tambahkan sumbu X
-    g.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xScale))
-        .selectAll("text")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .attr("transform", "rotate(-45)");
-
-    // Tambahkan sumbu Y
-    g.append("g").call(d3.axisLeft(yScale));
-
-    // Tambahkan label sumbu X
-    g.append("text")
-        .attr("class", "axis-label")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom + 10)
-        .style("text-anchor", "middle")
-        .text("Total Penjualan Global (Juta Unit)");
-
-    // Tambahkan label sumbu Y
-    g.append("text")
-        .attr("class", "axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left + 70)
-        .style("text-anchor", "middle")
-        .text("Platform");
-
-    // Tambahkan judul
-    svg.append("text")
-        .attr("x", 450)
-        .attr("y", 30)
-        .attr("text-anchor", "middle")
-        .style("font-size", "18px")
-        .style("font-weight", "bold")
-        .text("Total Penjualan Game Per Platform");
-
-    // Tambahkan bar
-    g.selectAll(".bar")
-        .data(displayData)
-        .enter()
-        .append("rect")
-        .attr("class", "bar")
-        .attr("y", (d) => yScale(d.platform))
-        .attr("height", yScale.bandwidth())
-        .attr("x", 0)
-        .attr("width", (d) => xScale(d.sales))
-        .attr("fill", "#4CAF50")
-        .on("mouseover", function (event, d) {
-            d3.select(this).attr("fill", "#2E7D32");
-
-            tooltip
-                .style("opacity", 1)
-                .html(
-                    `<strong>Platform:</strong> ${
-                        d.platform
-                    }<br><strong>Penjualan:</strong> ${d.sales.toFixed(2)} Juta`
-                )
-                .style("left", event.pageX + 10 + "px")
-                .style("top", event.pageY - 30 + "px");
-        })
-        .on("mouseout", function () {
-            d3.select(this).attr("fill", "#4CAF50");
-
-            tooltip.style("opacity", 0);
-        });
-
-    // Tambahkan label pada bar
-    g.selectAll(".bar-label")
-        .data(displayData)
-        .enter()
-        .append("text")
-        .attr("class", "bar-label")
-        .attr("x", (d) => xScale(d.sales) + 5)
-        .attr("y", (d) => yScale(d.platform) + yScale.bandwidth() / 2 + 5)
-        .text((d) => d.sales.toFixed(1))
-        .style("font-size", "12px")
-        .style("fill", "#666");
-
-    // Update keterangan
-    document.getElementById(
-        "chart-legend"
-    ).innerHTML = `Data menunjukkan 15 platform teratas berdasarkan total penjualan game (dalam juta unit) dari total ${barData.length} platform.`;
-}
+ // Function to render the chart based on current settings
+ function renderChart() {
+     // Clear the chart container
+     document.getElementById('chart').innerHTML = '';
+     
+     // Setup SVG
+     const width = document.getElementById('chart').clientWidth;
+     const height = 500;
+     const margin = { top: 40, right: 30, bottom: 80, left: 120 };
+     const innerWidth = width - margin.left - margin.right;
+     const innerHeight = height - margin.top - margin.bottom;
+     
+     // Create SVG element
+     const svg = d3.select('#chart')
+         .append('svg')
+         .attr('width', width)
+         .attr('height', height);
+     
+     // Create group for the chart with margins
+     const g = svg.append('g')
+         .attr('transform', `translate(${margin.left},${margin.top})`);
+     
+     // Process data based on chart type
+     let processedData;
+     let legendText;
+     
+     if (chartType === 'category') {
+         // Count apps per category
+         const categoryCount = d3.rollup(
+             playStoreData,
+             v => v.length,
+             d => d.Category
+         );
+         
+         processedData = Array.from(categoryCount, ([category, count]) => ({
+             key: category,
+             value: count
+         }));
+         
+         legendText = `Showing ${limit ? `top ${limit}` : 'all'} categories by number of apps in the Google Play Store.`;
+     } 
+     else if (chartType === 'rating') {
+         // Average rating per category
+         const categoryRatings = d3.rollup(
+             playStoreData.filter(d => !isNaN(d.Rating)),
+             v => d3.mean(v, d => d.Rating),
+             d => d.Category
+         );
+         
+         processedData = Array.from(categoryRatings, ([category, avgRating]) => ({
+             key: category,
+             value: avgRating
+         }));
+         
+         legendText = `Showing ${limit ? `top ${limit}` : 'all'} categories by average app rating in the Google Play Store.`;
+     } 
+     else if (chartType === 'installs') {
+         // Total installs per category
+         const categoryInstalls = d3.rollup(
+             playStoreData.filter(d => !isNaN(d.Installs)),
+             v => d3.sum(v, d => d.Installs),
+             d => d.Category
+         );
+         
+         processedData = Array.from(categoryInstalls, ([category, installs]) => ({
+             key: category,
+             value: installs
+         }));
+         
+         legendText = `Showing ${limit ? `top ${limit}` : 'all'} categories by total installations in the Google Play Store.`;
+     }
+     
+     // Sort data
+     processedData.sort((a, b) => {
+         return sortOrder === 'desc' 
+             ? b.value - a.value 
+             : a.value - b.value;
+     });
+     
+     // Apply limit if specified
+     if (limit) {
+         processedData = processedData.slice(0, limit);
+     }
+     
+     // Update the legend text
+     document.getElementById('chart-legend').textContent = legendText;
+     
+     // Create scales
+     const xScale = d3.scaleLinear()
+         .domain([0, d3.max(processedData, d => d.value) * 1.1])
+         .range([0, innerWidth]);
+     
+     const yScale = d3.scaleBand()
+         .domain(processedData.map(d => d.key))
+         .range([0, innerHeight])
+         .padding(0.2);
+     
+     // Add axes
+     g.append('g')
+         .attr('class', 'x-axis')
+         .attr('transform', `translate(0,${innerHeight})`)
+         .call(d3.axisBottom(xScale)
+             .ticks(5)
+             .tickFormat(d => {
+                 if (chartType === 'installs' && d >= 1000000) {
+                     return d3.format('.1s')(d);
+                 }
+                 return chartType === 'rating' ? d3.format('.1f')(d) : d3.format(',')(d);
+             })
+         )
+         .selectAll('text')
+         .attr('dy', '0.5em');
+     
+     g.append('g')
+         .attr('class', 'y-axis')
+         .call(d3.axisLeft(yScale))
+         .selectAll('text')
+         .attr('font-size', '12px');
+     
+     // Add axis labels
+     g.append('text')
+         .attr('class', 'x-axis-label')
+         .attr('x', innerWidth / 2)
+         .attr('y', innerHeight + 40)
+         .attr('text-anchor', 'middle')
+         .text(() => {
+             if (chartType === 'category') return 'Number of Apps';
+             if (chartType === 'rating') return 'Average Rating (1-5)';
+             if (chartType === 'installs') return 'Total Installations';
+         });
+     
+     g.append('text')
+         .attr('class', 'y-axis-label')
+         .attr('transform', 'rotate(-90)')
+         .attr('x', -innerHeight / 2)
+         .attr('y', -60)
+         .attr('text-anchor', 'middle')
+         .text('Category');
+     
+     // Add bars
+     const bars = g.selectAll('.bar')
+         .data(processedData)
+         .enter()
+         .append('rect')
+         .attr('class', 'bar')
+         .attr('x', 0)
+         .attr('y', d => yScale(d.key))
+         .attr('width', d => xScale(d.value))
+         .attr('height', yScale.bandwidth())
+         .attr('fill', '#4551FC')
+         .attr('rx', 4) // Rounded corners
+         .on('mouseover', function(event, d) {
+             // Highlight bar
+             d3.select(this)
+                 .attr('fill', '#FF8D58')
+                 .transition()
+                 .duration(200);
+             
+             // Show tooltip
+             let tooltipContent = '';
+             
+             if (chartType === 'category') {
+                 tooltipContent = `
+                     <h4>${d.key}</h4>
+                     <p><strong>Number of Apps:</strong> ${d3.format(',')(d.value)}</p>
+                     <p><strong>Percentage:</strong> ${d3.format('.1%')(d.value / playStoreData.length)}</p>
+                 `;
+             } else if (chartType === 'rating') {
+                 tooltipContent = `
+                     <h4>${d.key}</h4>
+                     <p><strong>Average Rating:</strong> ${d3.format('.2f')(d.value)}/5.0</p>
+                     <p><strong>Apps:</strong> ${d3.format(',')(playStoreData.filter(app => app.Category === d.key).length)}</p>
+                 `;
+             } else if (chartType === 'installs') {
+                 tooltipContent = `
+                     <h4>${d.key}</h4>
+                     <p><strong>Total Installs:</strong> ${d3.format('.2s')(d.value)}</p>
+                     <p><strong>Apps:</strong> ${d3.format(',')(playStoreData.filter(app => app.Category === d.key).length)}</p>
+                 `;
+             }
+             
+             tooltip
+                 .style('opacity', 1)
+                 .style('left', (event.pageX + 10) + 'px')
+                 .style('top', (event.pageY - 28) + 'px')
+                 .html(tooltipContent);
+         })
+         .on('mouseout', function() {
+             // Restore bar color
+             d3.select(this)
+                 .attr('fill', '#4551FC')
+                 .transition()
+                 .duration(200);
+             
+             // Hide tooltip
+             tooltip.style('opacity', 0);
+         });
+     
+     // Add labels to bars
+     g.selectAll('.bar-label')
+         .data(processedData)
+         .enter()
+         .append('text')
+         .attr('class', 'bar-label')
+         .attr('x', d => xScale(d.value) + 5)
+         .attr('y', d => yScale(d.key) + yScale.bandwidth() / 2)
+         .attr('dy', '.35em')
+         .text(d => {
+             if (chartType === 'rating') {
+                 return d3.format('.1f')(d.value);
+             } else if (chartType === 'installs') {
+                 return d3.format('.1s')(d.value);
+             } else {
+                 return d3.format(',')(d.value);
+             }
+         })
+         .attr('font-size', '12px')
+         .attr('fill', '#787878');
+     
+     // Add chart title
+     svg.append('text')
+         .attr('x', width / 2)
+         .attr('y', 20)
+         .attr('text-anchor', 'middle')
+         .attr('font-size', '18px')
+         .attr('font-weight', 'bold')
+         .attr('font-family', 'Space Grotesk, sans-serif')
+         .attr('fill', '#4551FC')
+         .text(() => {
+             if (chartType === 'category') return 'App Distribution by Category';
+             if (chartType === 'rating') return 'Average Rating by Category';
+             if (chartType === 'installs') return 'Total Installations by Category';
+         });
+ }

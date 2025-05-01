@@ -1,138 +1,297 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DataDeck</title>
-  <link rel="stylesheet" href="/css/style.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-  <header class="navbar-floating">
-    <div class="navbar-inner">
-      <div class="logo">
-        <img src="/img/datadeck logo.png" alt="Logo" width="28" style="vertical-align: middle; margin-right: 8px;">
-        <span>VisualisasiData</span>
-      </div>
-      <nav>
-        <ul>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#">DataDeck</a></li>
-          <li><a href="#about">About</a></li>
-        </ul>
-      </nav>
-      <a href="#chartSection" class="call-btn">DataDeck</a>
-    </div>
-  </header>
-
-  <main class="container">
-    <section id="hero" class="hero">
-      <p style="font-size: 18px;"><span style="font-size: 24px;">✋</span> Hey! It's me Reky,</p>
-      <h2>
-        Crafting <span class="highlight">purpose driven experiences</span> that inspire & engage.
-      </h2>
-      <p>Explore trends and insights from app data like never before.</p>
-      <a href="#chartSection" class="btn">Get Started</a>
-    </section>
-
-    <section id="features" class="features-section">
-      <h2 class="features-title">✧ Key Insights</h2>
-      <div class="features-container">
-        <div class="feature-card">
-          <h3>Most Popular Category</h3>
-          <p>Discover the top app categories with the highest number of apps.</p>
-          <a href="#visualization1" class="card-btn">Explore</a>
-        </div>
-        <div class="feature-card">
-          <h3>Rating Distribution</h3>
-          <p>Analyze how user ratings are distributed across all apps.</p>
-          <a href="#visualization2" class="card-btn">Explore</a>
-        </div>
-        <div class="feature-card">
-          <h3>Paid vs Free Ratings</h3>
-          <p>Compare average ratings between paid and free apps.</p>
-          <a href="#visualization3" class="card-btn">Explore</a>
-        </div>
-        <div class="feature-card">
-          <h3>Reviews & Ratings</h3>
-          <p>See how number of reviews correlates with ratings.</p>
-          <a href="#visualization4" class="card-btn">Explore</a>
-        </div>
-        <div class="feature-card">
-          <h3>Top Downloads by Category</h3>
-          <p>Explore which categories have the most app downloads.</p>
-          <a href="#visualization5" class="card-btn">Explore</a>
-        </div>
-        <div class="feature-card">
-          <h3>App Size vs Rating</h3>
-          <p>Understand the relationship between app size and ratings.</p>
-          <a href="#visualization6" class="card-btn">Explore</a>
-        </div>
-      </div>
-    </section>
-    
-    
-
-    <section class="about" id="about">
-      <div class="marquee">
-        <div class="track">
-          <div class="content">
-            ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ 
-          </div>
-          <div class="content">
-            ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ Designing ✴ Graphics ✴ Animations ✴ Community ✴ 
-          </div>
-        </div>
-      </div>
-
-    
-      <div class="about-inner">
-        <p class="tag">✧ ABOUT ME</p>
-        <h2>I’m Reky, the creator of DataDeck.</h2>
-        <p>
-          With a passion for clean data visualization and impactful design, I built this platform to simplify how users explore app trends. This project combines modern frontend techniques with meaningful data storytelling.
-        </p>
-    
-        <p class="desc">
-          <strong>About the app:</strong> DataDeck is a visualization dashboard built from real Google Play Store data. It helps users analyze app categories, trends, and performance in an interactive and elegant way — all in your browser.
-        </p>
-      </div>
-    </section>
-    
     <div class="container">
-      <h1>Visualisasi Data Penjualan Video Game Global</h1>
+        <header id="navbar">
+            <div class="logo">VD</div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Home</a></li>
+                    <li><a href="#">DataDeck</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle">
+                <svg id="moon-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+                <svg id="sun-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+        </header>
+        <main>
 
-      <div class="btn-container">
-          <button id="lineChartBtn" class="btn active">
-              Line Chart (Tahun vs Penjualan)
-          </button>
-          <button id="barChartBtn" class="btn">
-              Bar Chart (Platform vs Penjualan)
-          </button>
-      </div>
-
-      <div
-          id="chart-container"
-          class="chart-container"
-      >
-          <div class="loading">Memuat data dari file CSV...</div>
-      </div>
-
-      <div class="legend" id="chart-legend"></div>
-  </div>
-
-  <div class="tooltip" id="tooltip"></div>
-    
-    
-  </main>
-
-  <footer class="contact">
-    <div class="container">
-      <p>© 2025 DataDeck.</p>
+        <section class="hero">  
+            <div class="greeting">
+                <span class="star-icon">✧</span>
+                <span>Visualisasi Data</span>
+            </div>
+            
+            <h1 class="headline">
+                Dataset<span class="highlight">Google Play Store Apps - Lavanya</span> 
+            </h1>
+            
+            <div class="divider"></div>
+            
+            <p class="description">
+              Web scraped data of 10k Play Store apps for analysing the Android market. 
+            </p>
+        
+      </section>
+      <section class="data-analysis-section">
+        <div class="container">
+          <!-- Section Header -->
+          <div class="section-subtitle">
+            <div class="section-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L4 12M12 4L20 12M12 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3 class="section-tag">DATA ANALYSIS</h3>
+          </div>
+          
+          <h2 class="section-title">Google Play Store Data Insights</h2>
+          
+          <p class="section-description">
+            Eksplorasi data Google Play Store untuk mendapatkan wawasan mendalam tentang tren aplikasi, 
+            pola rating, dan kategori populer. Data tersedia untuk diakses dan divisualisasikan 
+            melalui fitur-fitur analisis kami.
+          </p>
+          
+          <!-- Features Grid -->
+          <div class="feature-grid">
+            <!-- Feature Card 1 -->
+            <a href="/data/popular-categories" class="feature-link">
+              <div class="feature-card">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                
+                <h3 class="card-title">Kategori Terpopuler Berdasarkan Jumlah Aplikasi</h3>
+                
+                <p class="card-description">Temukan kategori aplikasi yang paling banyak tersedia di Google Play Store</p>
+                
+                <div class="card-action">
+                  <span>Lihat Data</span>
+                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+            
+            <!-- Feature Card 2 -->
+            <a href="/data/rating-distribution" class="feature-link">
+              <div class="feature-card">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                
+                <h3 class="card-title">Distribusi Rating Aplikasi</h3>
+                
+                <p class="card-description">Lihat bagaimana rating aplikasi terdistribusi secara keseluruhan</p>
+                
+                <div class="card-action">
+                  <span>Lihat Data</span>
+                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+            
+            <!-- Feature Card 3 -->
+            <a href="/data/paid-vs-free" class="feature-link">
+              <div class="feature-card">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                
+                <h3 class="card-title">Perbandingan Rating Aplikasi Gratis vs Berbayar</h3>
+                
+                <p class="card-description">Analisis apakah aplikasi berbayar mendapatkan rating lebih baik dibandingkan aplikasi gratis</p>
+                
+                <div class="card-action">
+                  <span>Lihat Data</span>
+                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+            
+            <!-- Feature Card 4 -->
+            <a href="/data/top-downloads" class="feature-link">
+              <div class="feature-card">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                
+                <h3 class="card-title">Kategori dengan Rata-rata Unduhan Tertinggi</h3>
+                
+                <p class="card-description">Temukan kategori aplikasi yang memiliki rata-rata unduhan paling tinggi</p>
+                
+                <div class="card-action">
+                  <span>Lihat Data</span>
+                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <!-- Stats -->
+          <div class="stats-container">
+            <div class="stat-item">
+              <p class="stat-value">10k+</p>
+              <p class="stat-label">Baris data</p>
+            </div>
+            <div class="stat-item">
+              <p class="stat-value">13</p>
+              <p class="stat-label">Attribute</p>
+            </div>
+            <div class="stat-item">
+              <p class="stat-value">4.2</p>
+              <p class="stat-label">Rating Rata-rata</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="container">
+        <div class="viz-container">
+            <div class="controls">
+                <div class="control-group">
+                    <button id="categoryBtn" class="btn active">By Category</button>
+                    <button id="ratingBtn" class="btn">By Rating</button>
+                    <button id="installsBtn" class="btn">By Installs</button>
+                </div>
+                <div class="control-group">
+                    <select id="limitSelect">
+                        <option value="10">Top 10</option>
+                        <option value="15" selected>Top 15</option>
+                        <option value="20">Top 20</option>
+                        <option value="all">All Data</option>
+                    </select>
+                    <select id="sortSelect">
+                        <option value="desc" selected>Highest First</option>
+                        <option value="asc">Lowest First</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div id="tooltip" class="tooltip"></div>
+                <div class="loading">
+                    <span class="loader"></span>
+                    Loading data...
+                </div>
+                <div id="chart"></div>
+            </div>
+            
+            <div id="chart-legend" class="chart-legend">
+                Showing top 15 categories by number of apps in the Google Play Store.
+            </div>
+        </div>
+    </section>
+    </main>
+        <footer>
+            <div class="social-links">
+                <a href="#" class="social-link">
+                    LINKEDIN <span class="arrow-icon">↗</span>
+                </a>
+                <a href="https://github.com/mhRekyy/VisualisasiData/tree/reky" class="social-link">
+                    GITHUB <span class="arrow-icon">↗</span>
+                </a>
+                <a href="#" class="social-link">
+                    INSTAGRAM <span class="arrow-icon">↗</span>
+                </a>
+                <a href="#" class="social-link">
+                    GMAIL <span class="arrow-icon">↗</span>
+                </a>
+            </div>
+            
+            <button class="cta-button" id="cta-button">
+                Data Visualization
+            </button>
+        </footer>
     </div>
-  </footer>
-  <script src="js/d3.v7.min.js"></script>
-  <script src="js/chart.js"></script>
+    
+    <div class="briefcase-icon" id="briefcase-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="18" height="14" rx="2" ry="2"></rect>
+            <path d="M8 7V3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5V7"></path>
+        </svg>
+    </div>
+    
+    <div class="project-preview" id="project-preview">
+        <button class="close-preview" id="close-preview">×</button>
+        <h2>My Projects</h2>
+        <p>Here are some of my recent works that showcase my skills and expertise</p>
+        
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-img">Project 1</div>
+                <div class="project-info">
+                    <h3>E-Commerce Redesign</h3>
+                    <p>A complete UX/UI overhaul for a fashion brand</p>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-img">Project 2</div>
+                <div class="project-info">
+                    <h3>Mobile Banking App</h3>
+                    <p>Intuitive mobile experience for financial services</p>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-img">Project 3</div>
+                <div class="project-info">
+                    <h3>Healthcare Dashboard</h3>
+                    <p>Analytics platform for healthcare professionals</p>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-img">Project 4</div>
+                <div class="project-info">
+                    <h3>Travel Booking Platform</h3>
+                    <p>Streamlined booking experience for travelers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/style.js"></script>
 </body>
 </html>
