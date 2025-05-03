@@ -173,45 +173,52 @@
             </a>
           </div>
           
-          <!-- Stats -->
-          <div class="stats-container">
-            <div class="stat-item">
-              <p class="stat-value">10k+</p>
-              <p class="stat-label">Baris data</p>
-            </div>
-            <div class="stat-item">
-              <p class="stat-value">13</p>
-              <p class="stat-label">Attribute</p>
-            </div>
-            <div class="stat-item">
-              <p class="stat-value">4.2</p>
-              <p class="stat-label">Rating Rata-rata</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="container">
-        <div class="viz-container">
+          <div class="viz-container">
             <div class="controls">
                 <div class="control-group">
                     <button id="categoryBtn" class="btn active">By Category</button>
                     <button id="ratingBtn" class="btn">By Rating</button>
                     <button id="installsBtn" class="btn">By Installs</button>
+                    <button id="paidVsFreeBtn" class="btn">Paid vs Free</button> <!-- New button for Paid vs Free -->
                 </div>
-                <div class="control-group">
-                    <select id="limitSelect">
-                        <option value="10">Top 10</option>
-                        <option value="15" selected>Top 15</option>
-                        <option value="20">Top 20</option>
-                        <option value="all">All Data</option>
-                    </select>
-                    <select id="sortSelect">
-                        <option value="desc" selected>Highest First</option>
-                        <option value="asc">Lowest First</option>
-                    </select>
+                <div class="control-group" id="filterContainer">
+                    <!-- Filter untuk Category & Installs -->
+                    <div id="limitSortFilters">
+                        <select id="limitSelect">
+                            <option value="10">Top 10</option>
+                            <option value="15" selected>Top 15</option>
+                            <option value="20">Top 20</option>
+                            <option value="all">All Data</option>
+                        </select>
+                        <select id="sortSelect">
+                            <option value="desc" selected>Highest First</option>
+                            <option value="asc">Lowest First</option>
+                        </select>
+                    </div>
+        
+                    <!-- Filter untuk Rating & Paid vs Free -->
+                    <div id="rangeFilters" style="display: none;">
+                        <label for="installRange">Download Range:</label>
+                        <select id="installRange">
+                            <option value="1">1+</option>
+                            <option value="1000">1,000+</option>
+                            <option value="100000">100,000+</option>
+                            <option value="10000000">10,000,000+</option>
+                            <option value="1000000000">1,000,000,000+</option>
+                        </select>
+        
+                        <label for="ratingRange">Rating Range:</label>
+                        <select id="ratingRange">
+                            <option value="1.0">1.0+</option>
+                            <option value="2.0">2.0+</option>
+                            <option value="3.0">3.0+</option>
+                            <option value="4.0">4.0+</option>
+                            <option value="5.0">5.0</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            
+        
             <div class="chart-container">
                 <div id="tooltip" class="tooltip"></div>
                 <div class="loading">
@@ -220,11 +227,30 @@
                 </div>
                 <div id="chart"></div>
             </div>
-            
+        
             <div id="chart-legend" class="chart-legend">
                 Showing top 15 categories by number of apps in the Google Play Store.
             </div>
         </div>
+        
+    </section>
+    
+    <!-- Stats Section -->
+    <div class="stats-container">
+        <div class="stat-item">
+            <p class="stat-value">10k+</p>
+            <p class="stat-label">Baris data</p>
+        </div>
+        <div class="stat-item">
+            <p class="stat-value">13</p>
+            <p class="stat-label">Attribute</p>
+        </div>
+        <div class="stat-item">
+            <p class="stat-value">4.2</p>
+            <p class="stat-label">Rating Rata-rata</p>
+        </div>
+    </div>
+    
     </section>
     </main>
         <footer>
@@ -294,6 +320,6 @@
     </div>
   
     <script src="js/style.js"></script>
-    
+
 </body>
 </html>
