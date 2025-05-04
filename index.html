@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="js/chart.js"></script>
 </head>
@@ -172,86 +173,132 @@
               </div>
             </a>
           </div>
+
+        </section>
+    
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <p class="stat-value">10k+</p>
+                <p class="stat-label">Baris data</p>
+            </div>
+            <div class="stat-item">
+                <p class="stat-value">13</p>
+                <p class="stat-label">Attribute</p>
+            </div>
+            <div class="stat-item">
+                <p class="stat-value">4.2</p>
+                <p class="stat-label">Rating Rata-rata</p>
+            </div>
+        </div>
+        
+        </section>
           
-          <div class="viz-container">
-            <div class="controls">
-                <div class="control-group">
-                    <button id="categoryBtn" class="btn active">By Category</button>
-                    <button id="ratingBtn" class="btn">By Rating</button>
-                    <button id="installsBtn" class="btn">By Installs</button>
-                    <button id="paidVsFreeBtn" class="btn">Paid vs Free</button> <!-- New button for Paid vs Free -->
-                </div>
-                <div class="control-group" id="filterContainer">
-                    <!-- Filter untuk Category & Installs -->
-                    <div id="limitSortFilters">
-                        <select id="limitSelect">
-                            <option value="10">Top 10</option>
-                            <option value="15" selected>Top 15</option>
-                            <option value="20">Top 20</option>
-                            <option value="all">All Data</option>
-                        </select>
-                        <select id="sortSelect">
-                            <option value="desc" selected>Highest First</option>
-                            <option value="asc">Lowest First</option>
-                        </select>
-                    </div>
-        
-                    <!-- Filter untuk Rating & Paid vs Free -->
-                    <div id="rangeFilters" style="display: none;">
-                        <label for="installRange">Download Range:</label>
-                        <select id="installRange">
-                            <option value="1">1+</option>
-                            <option value="1000">1,000+</option>
-                            <option value="100000">100,000+</option>
-                            <option value="10000000">10,000,000+</option>
-                            <option value="1000000000">1,000,000,000+</option>
-                        </select>
-        
-                        <label for="ratingRange">Rating Range:</label>
-                        <select id="ratingRange">
-                            <option value="1.0">1.0+</option>
-                            <option value="2.0">2.0+</option>
-                            <option value="3.0">3.0+</option>
-                            <option value="4.0">4.0+</option>
-                            <option value="5.0">5.0</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="chart-container">
-                <div id="tooltip" class="tooltip"></div>
-                <div class="loading">
-                    <span class="loader"></span>
-                    Loading data...
-                </div>
-                <div id="chart"></div>
-            </div>
-        
-            <div id="chart-legend" class="chart-legend">
-                Showing top 15 categories by number of apps in the Google Play Store.
-            </div>
-        </div>
-        
-    </section>
-    
-    <!-- Stats Section -->
-    <div class="stats-container">
-        <div class="stat-item">
-            <p class="stat-value">10k+</p>
-            <p class="stat-label">Baris data</p>
-        </div>
-        <div class="stat-item">
-            <p class="stat-value">13</p>
-            <p class="stat-label">Attribute</p>
-        </div>
-        <div class="stat-item">
-            <p class="stat-value">4.2</p>
-            <p class="stat-label">Rating Rata-rata</p>
-        </div>
-    </div>
-    
-    </section>
+        <div class="viz-container">
+          <div class="controls">
+              <div class="control-group">
+                  <button id="categoryBtn" class="btn active">By Category</button>
+                  <button id="ratingBtn" class="btn">By Rating</button>
+                  <button id="installsBtn" class="btn">By Installs</button>
+                  <button id="paidVsFreeBtn" class="btn">Paid vs Free</button>
+                  <button id="reviewsVsRatingBtn" class="btn">Reviews vs Rating</button>
+                  <button id="sizeVsRatingBtn" class="btn">Size vs Rating</button>
+                  <button id="priceDistributionBtn" class="btn">Price Distribution</button>
+              </div>
+      
+              <div class="control-group" id="filterContainer">
+                  <!-- Shared: Limit + Sort Filters -->
+                  <div id="limitSortFilters">
+                      <select id="limitSelect">
+                          <option value="10">Top 10</option>
+                          <option value="15" selected>Top 15</option>
+                          <option value="20">Top 20</option>
+                          <option value="all">All Data</option>
+                      </select>
+                      <select id="sortSelect">
+                          <option value="desc" selected>Highest First</option>
+                          <option value="asc">Lowest First</option>
+                      </select>
+                  </div>
+      
+                  <!-- App Type (for Rating and Installs) -->
+                  <div id="appTypeFilter" style="display: none;">
+                      <label for="appTypeSelect">App Type:</label>
+                      <select id="appTypeSelect">
+                          <option value="both" selected>All</option>
+                          <option value="free">Free</option>
+                          <option value="paid">Paid</option>
+                      </select>
+                  </div>
+      
+                  <!-- Category filter (for Paid vs Free & Price Dist.) -->
+                  <div id="categoryFilter" style="display: none;">
+                      <label for="categorySelect">App Category:</label>
+                      <select id="categorySelect">
+                          <!-- Will be populated dynamically -->
+                      </select>
+                  </div>
+      
+                  <!-- Range Downloads (for Paid vs Free) -->
+                  <div id="rangeFilters" style="display: none;">
+                      <label for="installRange">Download Range:</label>
+                      <select id="installRange">
+                          <option value="1">1+</option>
+                          <option value="1000">1,000+</option>
+                          <option value="100000">100,000+</option>
+                          <option value="10000000">10,000,000+</option>
+                          <option value="1000000000">1,000,000,000+</option>
+                      </select>
+                  </div>
+      
+                  <!-- Minimum Reviews Filter (for Reviews vs Rating) -->
+                  <div id="minReviewsFilter" style="display: none;">
+                      <label for="minReviewsInput">Min Reviews:</label>
+                      <input type="number" id="minReviewsInput" value="1000" min="0">
+                  </div>
+      
+                  <!-- Size Filter (for Size vs Rating) -->
+                  <div id="sizeFilter" style="display: none;">
+                      <label for="sizeRangeSelect">Size Range (MB):</label>
+                      <select id="sizeRangeSelect">
+                          <option value="all">All</option>
+                          <option value="0-10">0 - 10</option>
+                          <option value="10-30">10 - 30</option>
+                          <option value="30-100">30 - 100</option>
+                          <option value="100+">> 100</option>
+                      </select>
+                  </div>
+      
+                  <!-- Price Range Filter (for Price Dist.) -->
+                  <div id="priceRangeFilter" style="display: none;">
+                      <label for="priceRangeSelect">Price Range (USD):</label>
+                      <select id="priceRangeSelect">
+                          <option value="all">All</option>
+                          <option value="0-1">0 - 1</option>
+                          <option value="1-5">1 - 5</option>
+                          <option value="5-10">5 - 10</option>
+                          <option value="10-50">10 - 50</option>
+                          <option value="50+">> 50</option>
+                      </select>
+                  </div>
+              </div>
+          </div>
+      
+          <div class="chart-container">
+              <div id="tooltip" class="tooltip"></div>
+              <div class="loading">
+                  <span class="loader"></span>
+                  Loading data...
+              </div>
+              <div id="chart"></div>
+              <div id="chart-legend" class="chart-legend"></div>
+          </div>
+      
+          <div id="chart-legend" class="chart-legend">
+              Showing top 15 categories by number of apps in the Google Play Store.
+          </div>
+      </div>
+      
     </main>
         <footer>
             <div class="social-links">

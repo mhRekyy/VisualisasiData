@@ -1,245 +1,765 @@
-// Variables to store state
-let playStoreData = [];
-let chartType = 'category';
-let limit = 15;
-let sortOrder = 'desc';
-let downloadRange = '1+';
-let ratingRange = 3.0;
-let tooltip;
+let allData = [];
+let chartInstance = null;
 
-// Initialize after page loaded
-document.addEventListener('DOMContentLoaded', function () {
-    // Setup event listeners for controls
-    document.getElementById('categoryBtn').addEventListener('click', function () {
-        setActiveChart('category');
-        setActiveButton(this);
-        updateFilters('category');
-    });
-
-    document.getElementById('ratingBtn').addEventListener('click', function () {
-        setActiveChart('rating');
-        setActiveButton(this);
-        updateFilters('rating');
-    });
-
-    document.getElementById('installsBtn').addEventListener('click', function () {
-        setActiveChart('installs');
-        setActiveButton(this);
-        updateFilters('installs');
-    });
-
-    document.getElementById('paidVsFreeBtn').addEventListener('click', function () {
-        setActiveChart('paidvsfree');
-        setActiveButton(this);
-        updateFilters('paidvsfree');
-    });
-
-    document.getElementById('limitSelect').addEventListener('change', function () {
-        limit = this.value === 'all' ? null : parseInt(this.value);
-        renderChart();
-    });
-
-    document.getElementById('sortSelect').addEventListener('change', function () {
-        sortOrder = this.value;
-        renderChart();
-    });
-
-    // NEW: Event listeners for download and rating range
-    document.getElementById('installRange').addEventListener('change', function () {
-        downloadRange = this.value;
-        renderChart();
-    });
-
-    document.getElementById('ratingRange').addEventListener('change', function () {
-        ratingRange = parseFloat(this.value);
-        renderChart();
-    });
-
-    tooltip = d3.select("#tooltip");
-
+window.onload = function () {
+    moveChartLegendToTop();
     loadData();
-});
-
-function setActiveButton(button) {
-    document.querySelectorAll('.control-group .btn').forEach(btn => {
-        btn.classList.remove('active');
+    setupEventListeners();
+    // Tambahkan event listener untuk resize
+    window.addEventListener('resize', function() {
+        if (chartInstance) {
+            setTimeout(rerenderActiveChart, 100);
+        }
     });
-    button.classList.add('active');
-}
+};
 
-function setActiveChart(type) {
-    chartType = type;
-    renderChart();
-}
-
-// Show/hide filters depending on selected chart type
-function updateFilters(type) {
-    const limitSortFilters = document.getElementById('limitSortFilters');
-    const rangeFilters = document.getElementById('rangeFilters');
-
-    if (type === 'category' || type === 'installs') {
-        limitSortFilters.style.display = 'flex';
-        rangeFilters.style.display = 'none';
-    } else if (type === 'rating' || type === 'paidvsfree') {
-        limitSortFilters.style.display = 'none';
-        rangeFilters.style.display = 'flex';
+// Fungsi untuk memindahkan chart-legend ke atas chart
+function moveChartLegendToTop() {
+    const chartLegend = document.getElementById('chart-legend');
+    const chartContainer = document.getElementById('chart');
+    
+    if (chartLegend && chartContainer) {
+        // Ambil parent dari chartContainer
+        const parent = chartContainer.parentNode;
+        
+        // Sisipkan legend sebelum chart container
+        parent.insertBefore(chartLegend, chartContainer);
+        
+        // Tambahkan sedikit margin bawah pada legend
+        chartLegend.style.marginBottom = '15px';
+        // Tambahkan style untuk memperjelas bahwa ini adalah judul
+        chartLegend.style.fontWeight = 'bold';
+        chartLegend.style.fontSize = '16px';
+        chartLegend.style.textAlign = 'center';
     }
 }
 
 function loadData() {
+    // Tampilkan loading
+    const loadingElement = document.querySelector('.loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'flex';
+    }
+    
     Papa.parse('data/googleplaystore.csv', {
-        header: true,
         download: true,
+        header: true,
         dynamicTyping: true,
-        skipEmptyLines: true,
         complete: function (results) {
-            playStoreData = results.data;
-
-            playStoreData.forEach(d => {
-                if (typeof d.Rating === 'string') d.Rating = parseFloat(d.Rating);
-                if (typeof d.Reviews === 'string') d.Reviews = parseInt(d.Reviews.replace(/,/g, ''));
-                if (typeof d.Installs === 'string') {
-                    d.Installs = parseInt(d.Installs.replace(/[+,]/g, '')) || 0;
-                }
-            });
-
-            document.querySelector('.loading').style.display = 'none';
-            renderChart();
+            allData = preprocessData(results.data);
+            populateCategoryOptions(allData);
+            renderByCategory(); // Default chart
+            
+            // Sembunyikan loading setelah selesai
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
         },
-        error: function (error) {
-            document.querySelector('.loading').style.display = 'none';
-            document.getElementById('chart').innerHTML =
-                '<div class="error">Failed to load data. Please check if the CSV file is accessible.</div>';
+        error: function(error) {
+            console.error('Error loading data:', error);
+            if (loadingElement) {
+                loadingElement.innerHTML = 'Error loading data. Please check console.';
+                loadingElement.style.color = 'red';
+            }
         }
     });
 }
 
-function renderChart() {
-    document.getElementById('chart').innerHTML = '';
+function preprocessData(data) {
+    return data.filter(d =>
+        d.Category && d.Rating && !isNaN(d.Rating) &&
+        d.Reviews && !isNaN(d.Reviews) &&
+        d.Installs && d.Installs !== '0' &&
+        d.Type && (d.Type === 'Free' || d.Type === 'Paid')
+    ).map(d => {
+        d.Installs = parseInt(d.Installs.toString().replace(/[+,]/g, '')) || 0;
+        d.Price = parseFloat(d.Price) || 0;
+        d.Reviews = parseInt(d.Reviews) || 0;
+        d.SizeMB = parseSizeToMB(d.Size);
+        return d;
+    });
+}
 
-    const width = document.getElementById('chart').clientWidth;
-    const height = 500;
-    const margin = { top: 40, right: 30, bottom: 80, left: 120 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    const svg = d3.select('#chart')
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
-
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    let processedData;
-    let legendText;
-
-    if (chartType === 'category') {
-        const categoryCount = d3.rollup(playStoreData, v => v.length, d => d.Category);
-        processedData = Array.from(categoryCount, ([key, value]) => ({ key, value }));
-        legendText = `Showing ${limit ? `top ${limit}` : 'all'} categories by number of apps in the Google Play Store.`;
-
-    } else if (chartType === 'rating') {
-        const minInstalls = parseInt(downloadRange.replace('+', '')) || 0;
-
-        const filteredData = playStoreData.filter(d => {
-            return !isNaN(d.Rating) && d.Rating >= ratingRange && d.Installs >= minInstalls;
-        });
-
-        const categoryRatings = d3.rollup(
-            filteredData,
-            v => d3.mean(v, d => d.Rating),
-            d => d.Category
-        );
-        processedData = Array.from(categoryRatings, ([key, value]) => ({ key, value }));
-        legendText = `Showing average ratings by category with at least ${downloadRange} installs and rating ≥ ${ratingRange}.`;
-
-    } else if (chartType === 'installs') {
-        const categoryInstalls = d3.rollup(
-            playStoreData.filter(d => !isNaN(d.Installs)),
-            v => d3.sum(v, d => d.Installs),
-            d => d.Category
-        );
-        processedData = Array.from(categoryInstalls, ([key, value]) => ({ key, value }));
-        legendText = `Showing ${limit ? `top ${limit}` : 'all'} categories by total installations.`;
-
-    } else if (chartType === 'paidvsfree') {
-        const typeRatings = d3.rollup(
-            playStoreData.filter(d => (d.Type === 'Free' || d.Type === 'Paid') && !isNaN(d.Rating)),
-            v => d3.mean(v, d => d.Rating),
-            d => d.Type
-        );
-        processedData = Array.from(typeRatings, ([key, value]) => ({ key, value }));
-        legendText = `Comparing average app ratings between Free and Paid apps.`;
-    }
-
-    if (processedData && chartType !== 'paidvsfree') {
-        processedData.sort((a, b) => sortOrder === 'desc' ? b.value - a.value : a.value - b.value);
-        if (limit) processedData = processedData.slice(0, limit);
-    }
-
-    document.getElementById('chart-legend').textContent = legendText;
-
-    const xScale = chartType === 'paidvsfree'
-        ? d3.scaleBand().domain(processedData.map(d => d.key)).range([0, innerWidth]).padding(0.2)
-        : d3.scaleLinear().domain([0, d3.max(processedData, d => d.value) * 1.1]).range([0, innerWidth]);
-
-    const yScale = chartType === 'paidvsfree'
-        ? d3.scaleLinear().domain([0, d3.max(processedData, d => d.value)]).range([innerHeight, 0])
-        : d3.scaleBand().domain(processedData.map(d => d.key)).range([0, innerHeight]).padding(0.2);
-
-    if (chartType === 'paidvsfree') {
-        g.append('g')
-            .attr('transform', `translate(0,${innerHeight})`)
-            .call(d3.axisBottom(xScale));
-        g.append('g')
-            .call(d3.axisLeft(yScale));
+function parseSizeToMB(size) {
+    if (typeof size !== 'string') return null;
+    if (size.includes('M')) {
+        return parseFloat(size.replace('M', ''));
+    } else if (size.includes('k')) {
+        return parseFloat(size.replace('k', '')) / 1024;
+    } else if (size.includes('G')) {
+        return parseFloat(size.replace('G', '')) * 1024;
     } else {
-        g.append('g')
-            .attr('transform', `translate(0,${innerHeight})`)
-            .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d3.format(chartType === 'rating' ? '.1f' : ',')(d)));
-        g.append('g')
-            .call(d3.axisLeft(yScale));
+        return null;
     }
+}
 
-    g.selectAll('.bar')
-        .data(processedData)
-        .enter()
-        .append('rect')
-        .attr('class', 'bar')
-        .attr('x', d => chartType === 'paidvsfree' ? xScale(d.key) : 0)
-        .attr('y', d => chartType === 'paidvsfree' ? yScale(d.value) : yScale(d.key))
-        .attr('width', d => chartType === 'paidvsfree' ? xScale.bandwidth() : xScale(d.value))
-        .attr('height', d => chartType === 'paidvsfree' ? innerHeight - yScale(d.value) : yScale.bandwidth())
-        .attr('fill', '#4551FC')
-        .on('mouseover', function (event, d) {
-            d3.select(this).attr('fill', '#FF8D58');
-            tooltip
-                .style('opacity', 1)
-                .style('left', (event.pageX + 10) + 'px')
-                .style('top', (event.pageY - 28) + 'px')
-                .html(`
-                    <h4>${d.key}</h4>
-                    <p><strong>Value:</strong> ${d3.format('.2f')(d.value)}</p>
-                `);
-        })
-        .on('mouseout', function () {
-            d3.select(this).attr('fill', '#4551FC');
-            tooltip.style('opacity', 0);
-        });
+function setupEventListeners() {
+    document.getElementById('categoryBtn').addEventListener('click', renderByCategory);
+    document.getElementById('ratingBtn').addEventListener('click', renderByRating);
+    document.getElementById('installsBtn').addEventListener('click', renderByInstalls);
+    document.getElementById('paidVsFreeBtn').addEventListener('click', renderPaidVsFree);
+    document.getElementById('reviewsVsRatingBtn').addEventListener('click', renderReviewsVsRating);
+    document.getElementById('sizeVsRatingBtn').addEventListener('click', renderSizeVsRating);
+    document.getElementById('priceDistributionBtn').addEventListener('click', renderPriceDistribution);
 
-    svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', 20)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '18px')
-        .attr('font-weight', 'bold')
-        .attr('font-family', 'Space Grotesk, sans-serif')
-        .attr('fill', '#4551FC')
-        .text(() => {
-            if (chartType === 'category') return 'Most Popular Categories';
-            if (chartType === 'rating') return 'Average Rating by Category';
-            if (chartType === 'installs') return 'Total Installs by Category';
-            if (chartType === 'paidvsfree') return 'Paid vs Free App Ratings';
-        });
+    document.getElementById('limitSelect').addEventListener('change', rerenderActiveChart);
+    document.getElementById('sortSelect').addEventListener('change', rerenderActiveChart);
+    document.getElementById('appTypeSelect').addEventListener('change', rerenderActiveChart);
+    document.getElementById('categorySelect').addEventListener('change', rerenderActiveChart);
+    document.getElementById('installRange').addEventListener('change', rerenderActiveChart);
+    document.getElementById('minReviewsInput').addEventListener('input', rerenderActiveChart);
+    document.getElementById('sizeRangeSelect').addEventListener('change', rerenderActiveChart);
+    document.getElementById('priceRangeSelect').addEventListener('change', rerenderActiveChart);
+}
+
+function rerenderActiveChart() {
+    const activeId = document.querySelector('.btn.active')?.id || 'categoryBtn';
+    switch (activeId) {
+        case 'categoryBtn': renderByCategory(); break;
+        case 'ratingBtn': renderByRating(); break;
+        case 'installsBtn': renderByInstalls(); break;
+        case 'paidVsFreeBtn': renderPaidVsFree(); break;
+        case 'reviewsVsRatingBtn': renderReviewsVsRating(); break;
+        case 'sizeVsRatingBtn': renderSizeVsRating(); break;
+        case 'priceDistributionBtn': renderPriceDistribution(); break;
+    }
+}
+
+function renderChart({ type = 'bar', labels, datasets, options = {} }) {
+    // Ambil elemen chart
+    const chartContainer = document.getElementById('chart');
+    
+    // Periksa apakah chartContainer ada
+    if (!chartContainer) {
+        console.error('Chart container tidak ditemukan');
+        return;
+    }
+    
+    // Tampilkan loading indicator
+    const loadingElement = document.querySelector('.loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'flex';
+    }
+    
+    // Hapus semua child element dari chart container
+    while (chartContainer.firstChild) {
+        chartContainer.removeChild(chartContainer.firstChild);
+    }
+    
+    // Buat elemen canvas baru untuk chart
+    const canvas = document.createElement('canvas');
+    chartContainer.appendChild(canvas);
+    
+    // Sesuaikan tinggi canvas agar memenuhi container
+    adjustChartHeight();
+    
+    // Dapatkan context untuk canvas yang baru dibuat
+    const ctx = canvas.getContext('2d');
+    
+    // Hapus chart sebelumnya jika ada
+    if (chartInstance) chartInstance.destroy();
+    
+    // Buat chart baru dengan opsi yang ditingkatkan
+    chartInstance = new Chart(ctx, {
+        type,
+        data: { labels, datasets },
+        options: {
+            ...options,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                ...options.plugins,
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 10,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 10
+                }
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 20,
+                    top: 0,
+                    bottom: 10
+                }
+            },
+            scales: {
+                ...options.scales,
+                x: {
+                    ...options.scales?.x,
+                    ticks: {
+                        ...options.scales?.x?.ticks,
+                        autoSkip: true,
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        display: true,
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                y: {
+                    ...options.scales?.y,
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Sembunyikan loading indicator
+    if (loadingElement) {
+        loadingElement.style.display = 'none';
+    }
+}
+
+// Fungsi untuk menyesuaikan tinggi chart
+function adjustChartHeight() {
+    const chartContainer = document.getElementById('chart');
+    if (!chartContainer) return;
+    
+    // Ambil tinggi window dan posisi container
+    const windowHeight = window.innerHeight;
+    const containerRect = chartContainer.getBoundingClientRect();
+    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+    const controlsHeight = document.querySelector('.controls')?.offsetHeight || 0;
+    const footerHeight = document.querySelector('footer')?.offsetHeight || 0;
+    const legendHeight = document.getElementById('chart-legend')?.offsetHeight || 0;
+    
+    // Hitung tinggi yang tersedia
+    const availableHeight = windowHeight - headerHeight - controlsHeight - footerHeight - legendHeight - 40;
+    
+    // Setel tinggi minimal
+    const minHeight = 400;
+    const chartHeight = Math.max(availableHeight, minHeight);
+    
+    // Terapkan tinggi
+    chartContainer.style.height = `${chartHeight}px`;
+}
+
+function getFilterValues() {
+    return {
+        limit: document.getElementById('limitSelect').value,
+        sort: document.getElementById('sortSelect').value,
+        appType: document.getElementById('appTypeSelect').value,
+        category: document.getElementById('categorySelect').value,
+        downloadMin: parseInt(document.getElementById('installRange').value),
+        minReviews: parseInt(document.getElementById('minReviewsInput').value),
+        sizeRange: document.getElementById('sizeRangeSelect').value,
+        priceRange: document.getElementById('priceRangeSelect').value
+    };
+}
+
+function setFilterVisibility(filters) {
+    const ids = ['limitSortFilters', 'appTypeFilter', 'categoryFilter', 'rangeFilters', 'minReviewsFilter', 'sizeFilter', 'priceRangeFilter'];
+    ids.forEach(id => {
+        document.getElementById(id).style.display = filters.includes(id) ? 'inline-block' : 'none';
+    });
+}
+
+function populateCategoryOptions(data) {
+    const categories = [...new Set(data.map(d => d.Category))].sort();
+    const select = document.getElementById('categorySelect');
+    select.innerHTML = '';
+    categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        select.appendChild(opt);
+    });
+}
+
+function renderByCategory() {
+    activateButton('categoryBtn');
+    setFilterVisibility(['limitSortFilters']);
+
+    const { limit, sort } = getFilterValues();
+    const categoryCount = {};
+
+    allData.forEach(app => {
+        categoryCount[app.Category] = (categoryCount[app.Category] || 0) + 1;
+    });
+
+    let sorted = Object.entries(categoryCount).sort((a, b) =>
+        sort === 'asc' ? a[1] - b[1] : b[1] - a[1]
+    );
+
+    if (limit !== 'all') sorted = sorted.slice(0, +limit);
+
+    // Truncate long category names
+    const labels = sorted.map(e => {
+        const category = e[0];
+        return category.length > 15 ? category.substring(0, 12) + '...' : category;
+    });
+
+    renderChart({
+        type: 'bar', // We'll use Chart.js indexAxis to make it horizontal
+        labels,
+        datasets: [{
+            label: 'Jumlah Aplikasi',
+            data: sorted.map(e => e[1]),
+            backgroundColor: 'teal',
+            borderColor: 'rgba(0, 128, 128, 0.8)',
+            borderWidth: 1
+        }],
+        options: { 
+            responsive: true,
+            indexAxis: 'y', // This is the key change that makes the bar chart horizontal
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            // Menampilkan nama kategori asli di tooltip
+                            const index = tooltipItems[0].dataIndex;
+                            return sorted[index][0];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend('Menampilkan kategori terpopuler berdasarkan jumlah aplikasi.');
+}
+
+function renderByRating() {
+    activateButton('ratingBtn');
+    setFilterVisibility(['limitSortFilters', 'appTypeFilter']);
+
+    const { limit, sort, appType } = getFilterValues();
+    const filtered = allData.filter(app =>
+        (appType === 'both' || app.Type.toLowerCase() === appType.toLowerCase())
+    );
+
+    const avgRatings = {};
+    const count = {};
+
+    filtered.forEach(app => {
+        if (app.Category) {
+            avgRatings[app.Category] = (avgRatings[app.Category] || 0) + app.Rating;
+            count[app.Category] = (count[app.Category] || 0) + 1;
+        }
+    });
+
+    const result = Object.entries(avgRatings).map(([cat, total]) => [cat, total / count[cat]]);
+
+    let sorted = result.sort((a, b) =>
+        sort === 'asc' ? a[1] - b[1] : b[1] - a[1]
+    );
+
+    if (limit !== 'all') sorted = sorted.slice(0, +limit);
+
+    // Truncate long category names
+    const labels = sorted.map(e => {
+        const category = e[0];
+        return category.length > 15 ? category.substring(0, 12) + '...' : category;
+    });
+
+    renderChart({
+        type: 'bar',
+        labels,
+        datasets: [{
+            label: 'Rata-rata Rating',
+            data: sorted.map(e => e[1]),
+            backgroundColor: 'orange',
+            borderColor: 'rgba(255, 165, 0, 0.8)',
+            borderWidth: 1
+        }],
+        options: { 
+            responsive: true,
+            indexAxis: 'y', // Make the bar chart horizontal
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return sorted[index][0];
+                        },
+                        label: function(context) {
+                            return `Rating: ${context.raw.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    suggestedMax: 5 // Since ratings are typically up to 5
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend('Distribusi rating aplikasi berdasarkan kategori.');
+}
+
+function renderByInstalls() {
+    activateButton('installsBtn');
+    setFilterVisibility(['limitSortFilters', 'appTypeFilter']);
+
+    const { limit, sort, appType } = getFilterValues();
+    const filtered = allData.filter(app =>
+        (appType === 'both' || app.Type.toLowerCase() === appType.toLowerCase())
+    );
+
+    const avgInstalls = {};
+    const count = {};
+
+    filtered.forEach(app => {
+        if (app.Category) {
+            avgInstalls[app.Category] = (avgInstalls[app.Category] || 0) + app.Installs;
+            count[app.Category] = (count[app.Category] || 0) + 1;
+        }
+    });
+
+    const result = Object.entries(avgInstalls).map(([cat, total]) => [cat, total / count[cat]]);
+
+    let sorted = result.sort((a, b) =>
+        sort === 'asc' ? a[1] - b[1] : b[1] - a[1]
+    );
+
+    if (limit !== 'all') sorted = sorted.slice(0, +limit);
+
+    // Truncate long category names
+    const labels = sorted.map(e => {
+        const category = e[0];
+        return category.length > 15 ? category.substring(0, 12) + '...' : category;
+    });
+
+    renderChart({
+        type: 'bar',
+        labels,
+        datasets: [{
+            label: 'Rata-rata Unduhan',
+            data: sorted.map(e => e[1]),
+            backgroundColor: 'purple',
+            borderColor: 'rgba(128, 0, 128, 0.8)',
+            borderWidth: 1
+        }],
+        options: { 
+            responsive: true,
+            indexAxis: 'y', // Make the bar chart horizontal
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return sorted[index][0];
+                        },
+                        label: function(context) {
+                            return `Unduhan: ${formatNumber(context.raw)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend('Kategori dengan rata-rata unduhan tertinggi.');
+}
+
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num;
+}
+
+function renderPaidVsFree() {
+    activateButton('paidVsFreeBtn');
+    setFilterVisibility(['categoryFilter', 'rangeFilters']);
+
+    const { category, downloadMin } = getFilterValues();
+    const filtered = allData.filter(app =>
+        app.Category === category && app.Installs >= downloadMin
+    );
+
+    const grouped = { Free: [], Paid: [] };
+    filtered.forEach(app => {
+        if (app.Type && (app.Type === 'Free' || app.Type === 'Paid')) {
+            grouped[app.Type].push(app.Rating);
+        }
+    });
+
+    const avgFree = average(grouped.Free);
+    const avgPaid = average(grouped.Paid);
+    const countFree = grouped.Free.length;
+    const countPaid = grouped.Paid.length;
+
+    renderChart({
+        labels: ['Free', 'Paid'],
+        datasets: [{
+            label: 'Rata-rata Rating',
+            data: [avgFree, avgPaid],
+            backgroundColor: ['rgba(0, 128, 0, 0.7)', 'rgba(255, 0, 0, 0.7)'],
+            borderColor: ['green', 'red'],
+            borderWidth: 1
+        }],
+        options: { 
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const count = context.dataIndex === 0 ? countFree : countPaid;
+                            return [
+                                `Rating: ${context.raw.toFixed(2)}`,
+                                `Jumlah Aplikasi: ${count}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend(`Perbandingan rating antara aplikasi Free dan Paid di kategori ${category}.`);
+}
+
+function renderReviewsVsRating() {
+    activateButton('reviewsVsRatingBtn');
+    setFilterVisibility(['minReviewsFilter']);
+
+    const { minReviews } = getFilterValues();
+    const data = allData.filter(app => app.Reviews >= minReviews);
+
+    renderChart({
+        type: 'scatter',
+        labels: data.map(d => d.App),
+        datasets: [{
+            label: 'Review vs Rating',
+            data: data.map(app => ({ x: app.Reviews, y: app.Rating })),
+            backgroundColor: 'rgba(0, 0, 255, 0.6)',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+        }],
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    type: 'logarithmic', 
+                    title: { text: 'Jumlah Ulasan (log scale)', display: true },
+                    ticks: {
+                        callback: function(value) {
+                            return formatNumber(value);
+                        }
+                    }
+                },
+                y: { 
+                    title: { text: 'Rating', display: true },
+                    min: 1,
+                    max: 5
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return data[index].App;
+                        },
+                        label: function(context) {
+                            const app = data[context.dataIndex];
+                            return [
+                                `Rating: ${app.Rating}`,
+                                `Reviews: ${formatNumber(app.Reviews)}`,
+                                `Category: ${app.Category}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend('Hubungan antara jumlah ulasan dan rating.');
+}
+
+function renderSizeVsRating() {
+    activateButton('sizeVsRatingBtn');
+    setFilterVisibility(['sizeFilter']);
+
+    const { sizeRange } = getFilterValues();
+    const [minSize, maxSize] = sizeRange === 'all' ? [0, Infinity] :
+        sizeRange === '100+' ? [100, Infinity] : sizeRange.split('-').map(Number);
+
+    const filtered = allData.filter(app =>
+        app.SizeMB !== null && app.SizeMB >= minSize && app.SizeMB <= maxSize
+    );
+
+    renderChart({
+        type: 'scatter',
+        labels: filtered.map(d => d.App),
+        datasets: [{
+            label: 'Size vs Rating',
+            data: filtered.map(app => ({ x: app.SizeMB, y: app.Rating })),
+            backgroundColor: 'rgba(255, 140, 0, 0.6)',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+        }],
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    type: 'linear', 
+                    title: { text: 'Ukuran Aplikasi (MB)', display: true } 
+                },
+                y: { 
+                    title: { text: 'Rating', display: true },
+                    min: 1,
+                    max: 5
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return filtered[index].App;
+                        },
+                        label: function(context) {
+                            const app = filtered[context.dataIndex];
+                            return [
+                                `Rating: ${app.Rating}`,
+                                `Size: ${app.SizeMB.toFixed(1)} MB`,
+                                `Category: ${app.Category}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend('Hubungan antara ukuran aplikasi dan rating.');
+}
+
+function renderPriceDistribution() {
+    activateButton('priceDistributionBtn');
+    setFilterVisibility(['categoryFilter', 'priceRangeFilter']);
+
+    const { category, priceRange } = getFilterValues();
+    const [minP, maxP] = priceRange === 'all' ? [0, Infinity] :
+        priceRange === '50+' ? [50, Infinity] : priceRange.split('-').map(Number);
+
+    const data = allData.filter(app =>
+        app.Type === 'Paid' && app.Category === category &&
+        app.Price >= minP && app.Price <= maxP
+    );
+
+    // Lebih banyak bin untuk distribusi yang lebih halus
+    const maxPrice = Math.ceil(Math.max(...data.map(app => app.Price)));
+    const binSize = maxPrice > 50 ? 5 : maxPrice > 20 ? 2 : 1;
+    const bins = {};
+
+    data.forEach(app => {
+        const binIndex = Math.floor(app.Price / binSize) * binSize;
+        bins[binIndex] = (bins[binIndex] || 0) + 1;
+    });
+
+    const labels = Object.keys(bins).sort((a, b) => a - b).map(p => 
+        `$${p}-$${Number(p) + binSize}`
+    );
+
+    const values = labels.map((_, i) => {
+        const binIndex = Number(Object.keys(bins).sort((a, b) => a - b)[i]);
+        return bins[binIndex] || 0;
+    });
+
+    renderChart({
+        type: 'bar',
+        labels,
+        datasets: [{
+            label: 'Jumlah Aplikasi',
+            data: values,
+            backgroundColor: 'rgba(128, 128, 128, 0.7)',
+            borderColor: 'rgba(70, 70, 70, 0.9)',
+            borderWidth: 1
+        }],
+        options: { 
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Jumlah Aplikasi: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    setLegend(`Distribusi harga aplikasi berbayar di kategori ${category}.`);
+}
+
+function activateButton(id) {
+    document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function setLegend(text) {
+    const legendElement = document.getElementById('chart-legend');
+    if (legendElement) {
+        legendElement.textContent = text;
+    } else {
+        console.warn('Elemen legend tidak ditemukan');
+    }
+}
+
+function average(arr) {
+    return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
 }
