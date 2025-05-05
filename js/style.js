@@ -8,6 +8,50 @@ const htmlEl = document.documentElement;
 const savedTheme = localStorage.getItem('theme') || 'dark';
 htmlEl.setAttribute('data-theme', savedTheme);
 
+document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('header');
+    let lastScrollY = window.scrollY;
+    let scrollingDown = false;
+    let scrollTimer;
+
+    // Initial state check
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+    }
+
+    window.addEventListener('scroll', function() {
+        // Clear the previous timer
+        clearTimeout(scrollTimer);
+        
+        // Determine scroll direction
+        const currentScrollY = window.scrollY;
+        scrollingDown = currentScrollY > lastScrollY;
+        
+        // Add 'scrolled' class if page is scrolled
+        if (currentScrollY > 50) {
+            header.classList.add('scrolled');
+            
+            // Hide navbar when scrolling down, show when scrolling up
+            if (scrollingDown && currentScrollY > 150) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+        } else {
+            header.classList.remove('scrolled');
+            header.classList.remove('hidden');
+        }
+        
+        lastScrollY = currentScrollY;
+        
+        // Set a timer to show the navbar again after scrolling stops
+        scrollTimer = setTimeout(function() {
+            header.classList.remove('hidden');
+        }, 2000); // Show navbar again after 2 seconds of no scrolling
+    });
+});
+
+
 // Update icon display based on current theme
 updateThemeIcon(savedTheme);
 

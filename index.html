@@ -20,8 +20,9 @@
             <div class="logo">VD</div>
             <nav>
                 <ul>
-                    <li><a href="#" class="active">Home</a></li>
-                    <li><a href="#">DataDeck</a></li>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#About">About</a></li>
+                    <li><a href="#visualisasi-data">Visualisasi Data</a></li>
                 </ul>
             </nav>
             <button class="theme-toggle" id="theme-toggle">
@@ -43,8 +44,8 @@
         </header>
         <main>
 
-        <section class="hero">  
-            <div class="greeting">
+        <section class="hero" id="home">  
+            <div class="greeting"> 
                 <span class="star-icon">✧</span>
                 <span>Visualisasi Data</span>
             </div>
@@ -58,20 +59,14 @@
             <p class="description">
               Web scraped data of 10k Play Store apps for analysing the Android market. 
             </p>
-        
+            <button href="#viz-container" class="cta-button" ">
+              Data Visualization
+          </button>
       </section>
       <section class="data-analysis-section">
-        <div class="container">
-          <!-- Section Header -->
-          <div class="section-subtitle">
-            <div class="section-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4L4 12M12 4L20 12M12 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <h3 class="section-tag">DATA ANALYSIS</h3>
-          </div>
-          
+        <div class="container" id="About">
+          <span class="star-icon">✧</span>
+          <span>Visualisasi Data</span>
           <h2 class="section-title">Google Play Store Data Insights</h2>
           
           <p class="section-description">
@@ -194,7 +189,7 @@
         
         </section>
           
-        <div class="viz-container">
+        <div class="viz-container" id="visualisasi-data">
           <div class="controls">
               <div class="control-group">
                   <button id="categoryBtn" class="btn active">By Category</button>
@@ -315,10 +310,8 @@
                     GMAIL <span class="arrow-icon">↗</span>
                 </a>
             </div>
-            
-            <button class="cta-button" id="cta-button">
-                Data Visualization
-            </button>
+            <div class="footer-text">
+                <p>&copy; 2023 Visualisasi Data. All rights reserved.</p>
         </footer>
     </div>
     
