@@ -272,9 +272,18 @@
       
                   <!-- Minimum Reviews Filter (for Reviews vs Rating) -->
                   <div id="minReviewsFilter" style="display: none;">
-                      <label for="minReviewsInput">Min Reviews:</label>
-                      <input type="number" id="minReviewsInput" value="1000" min="0">
-                  </div>
+                    <label for="minReviewsSelect">Min Reviews:</label>
+                    <select id="minReviewsSelect">
+                        <option value="0">0</option>
+                        <option value="100">100</option>
+                        <option value="500">500</option>
+                        <option value="1000" selected>1000</option>
+                        <option value="5000">5000</option>
+                        <option value="10000">10000</option>
+                        <option value="50000">50000</option>
+                    </select>
+                </div>
+                
       
                   <!-- Size Filter (for Size vs Rating) -->
                   <div id="sizeFilter" style="display: none;">

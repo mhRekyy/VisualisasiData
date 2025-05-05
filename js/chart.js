@@ -107,7 +107,7 @@ function setupEventListeners() {
     document.getElementById('appTypeSelect').addEventListener('change', rerenderActiveChart);
     document.getElementById('categorySelect').addEventListener('change', rerenderActiveChart);
     document.getElementById('installRange').addEventListener('change', rerenderActiveChart);
-    document.getElementById('minReviewsInput').addEventListener('input', rerenderActiveChart);
+    document.getElementById('minReviewsSelect').addEventListener('change', rerenderActiveChart);
     document.getElementById('sizeRangeSelect').addEventListener('change', rerenderActiveChart);
     document.getElementById('priceRangeSelect').addEventListener('change', rerenderActiveChart);
 }
@@ -265,7 +265,7 @@ function getFilterValues() {
         appType: document.getElementById('appTypeSelect').value,
         category: document.getElementById('categorySelect').value,
         downloadMin: parseInt(document.getElementById('installRange').value),
-        minReviews: parseInt(document.getElementById('minReviewsInput').value),
+        minReviews: parseInt(document.getElementById('minReviewsSelect').value),
         sizeRange: document.getElementById('sizeRangeSelect').value,
         priceRange: document.getElementById('priceRangeSelect').value
     };
