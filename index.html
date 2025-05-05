@@ -51,7 +51,7 @@
             </div>
             
             <h1 class="headline">
-                Dataset<span class="highlight">Google Play Store Apps - Lavanya</span> 
+                Dataset<span class="highlight">Google Play Store Apps - 2019</span> 
             </h1>
             
             <div class="divider"></div>
@@ -59,18 +59,20 @@
             <p class="description">
               Web scraped data of 10k Play Store apps for analysing the Android market. 
             </p>
-            <button href="#viz-container" class="cta-button" ">
+            <a href="#visualisasi-data">
+            <button class="cta-button" ">
               Data Visualization
-          </button>
+            </button>
+            </a>
       </section>
       <section class="data-analysis-section">
         <div class="container" id="About">
           <span class="star-icon">✧</span>
-          <span>Visualisasi Data</span>
-          <h2 class="section-title">Google Play Store Data Insights</h2>
+          <span>Tentang data & Fitur</span>
+          <h2 class="section-title">Google Play Store App Data</h2>
           
           <p class="section-description">
-            Dataset Google Play Store menyajikan informasi komprehensif
+            Dataset Google Play Store menyajikan informasi komprehensif 
             mengenai aplikasi Android, mencakup aspek-aspek seperti
             kategori, rating, ulasan, ukuran, hingga kompatibilitas versi
             Android. Dengan kelengkapan dan keragamannya, dataset ini
@@ -82,7 +84,7 @@
           <!-- Features Grid -->
           <div class="feature-grid">
             <!-- Feature Card 1 -->
-            <a href="/data/popular-categories" class="feature-link">
+            <a href="#categoryBtn" class="feature-link">
               <div class="feature-card">
                 <div class="card-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -92,19 +94,13 @@
                 
                 <h3 class="card-title">Kategori Terpopuler Berdasarkan Jumlah Aplikasi</h3>
                 
-                <p class="card-description">Temukan kategori aplikasi yang paling banyak tersedia di Google Play Store</p>
+                <p class="card-description">Apa kategori aplikasi paling populer berdasarkan jumlah aplikasi?</p>
                 
-                <div class="card-action">
-                  <span>Lihat Data</span>
-                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
               </div>
             </a>
             
             <!-- Feature Card 2 -->
-            <a href="/data/rating-distribution" class="feature-link">
+            <a href="#ratingBtn" class="feature-link">
               <div class="feature-card">
                 <div class="card-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,19 +112,13 @@
                 
                 <h3 class="card-title">Distribusi Rating Aplikasi</h3>
                 
-                <p class="card-description">Lihat bagaimana rating aplikasi terdistribusi secara keseluruhan</p>
+                <p class="card-description">Bagaimana distribusi rating aplikasi secara umum?</p>
                 
-                <div class="card-action">
-                  <span>Lihat Data</span>
-                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
               </div>
             </a>
             
             <!-- Feature Card 3 -->
-            <a href="/data/paid-vs-free" class="feature-link">
+            <a href="#" class="feature-link">
               <div class="feature-card">
                 <div class="card-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -136,21 +126,15 @@
                   </svg>
                 </div>
                 
-                <h3 class="card-title">Perbandingan Rating Aplikasi Gratis vs Berbayar</h3>
+                <h3 class="card-title">Perbandingan Rating Aplikasi Gratis & Berbayar</h3>
                 
-                <p class="card-description">Analisis apakah aplikasi berbayar mendapatkan rating lebih baik dibandingkan aplikasi gratis</p>
+                <p class="card-description">Apakah aplikasi berbayar mendapatkan rating lebih tinggi dibanding aplikasi gratis?</p>
                 
-                <div class="card-action">
-                  <span>Lihat Data</span>
-                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
               </div>
             </a>
             
             <!-- Feature Card 4 -->
-            <a href="/data/top-downloads" class="feature-link">
+            <a href="#" class="feature-link ">
               <div class="feature-card">
                 <div class="card-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -159,19 +143,55 @@
                   </svg>
                 </div>
                 
-                <h3 class="card-title">Kategori dengan Rata-rata Unduhan Tertinggi</h3>
+                <h3 class="card-title">Hubungan Ulasan dan rating</h3>
                 
-                <p class="card-description">Temukan kategori aplikasi yang memiliki rata-rata unduhan paling tinggi</p>
+                <p class="card-description">Apa hubungan antara jumlah ulasan dan rating?</p>
                 
-                <div class="card-action">
-                  <span>Lihat Data</span>
-                  <svg class="action-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 8h14M9 3l6 5-6 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
               </div>
             </a>
-        </section>
+      
+            <!-- Feature Card 5 (Hidden initially) -->
+            <a href="#" class="feature-link ">
+              <div class="feature-card">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    <path d="M3 9h18M9 21V9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <h3 class="card-title">Hubungan Ukuran Aplikasi & Rating</h3>
+                <p class="card-description">Apakah ada hubungan antara ukuran aplikasi dengan rating?</p>
+              </div>
+            </a>
+            
+            <!-- Feature Card 6 (Hidden initially) -->
+            <a href="#" class="feature-link ">
+              <div class="feature-card">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <h3 class="card-title">Kategori Aplikasi dengan Unduhan Tertinggi</h3>
+                <p class="card-description">Aplikasi dari kategori mana yang memiliki rata-rata unduhan tertinggi?</p>
+              </div>
+            </a>
+            
+            <!-- Feature Card 7 (Hidden initially) -->
+            <a href="#" class="feature-link ">
+              <div class="feature-card-last">
+                <div class="card-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16v6H4V4zM4 14h10v6H4v-6zM16 14h4v6h-4v-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <h3 class="card-title">Rata rata Harga App Berbayar & Distribusinya</h3>
+                <p class="card-description">Berapa rata-rata harga aplikasi berbayar dan bagaimana distribusinya?</p>
+              </div>
+            </a>
+          </div>
+          
     
         <!-- Stats Section -->
         <div class="stats-container">
@@ -184,8 +204,8 @@
                 <p class="stat-label">Attribute</p>
             </div>
             <div class="stat-item">
-                <p class="stat-value">4.2</p>
-                <p class="stat-label">Rating Rata-rata</p>
+                <p class="stat-value">7</p>
+                <p class="stat-label">Visualisasi Data</p>
             </div>
         </div>
         
@@ -326,7 +346,7 @@
         </svg>
     </div>
     
-    <div class="project-preview" id="project-preview">
+    <!-- <div class="project-preview" id="project-preview">
         <button class="close-preview" id="close-preview">×</button>
         <h2>My Projects</h2>
         <p>Here are some of my recent works that showcase my skills and expertise</p>
@@ -361,7 +381,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
   
     <script src="js/style.js"></script>
 
